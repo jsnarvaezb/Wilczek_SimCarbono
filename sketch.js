@@ -140,12 +140,7 @@ function draw() {
 
   // Iteration over freeMolecules
   for (let m of freeMolecules) {
-<<<<<<< HEAD
-    if (m.updateMolecule()) bondMolecules.splice(bondMolecules.indexOf(m), 1);
-=======
-    m.updateMolecule();
-    if (checkBounds(m)) freeMolecules.splice(freeMolecules.indexOf(m), 1);
->>>>>>> 294f6d0ee5ad6762a80019db7f9cd230bf4dfb4a
+    if (m.updateMolecule()) freeMolecules.splice(freeMolecules.indexOf(m), 1);
   }
 }
 ////    ////    ////    ////    ////    ////    ////    ////    ////    ////
@@ -162,12 +157,10 @@ function keyTyped() {
 function newMolecule(type) {
   var minBound = bound / 2;
   var maxBound = bound - 100;
-  console.log("asdasdasd");
   nm = new Molecule(Math.sign(fullRandom()) * (minBound + (maxBound - minBound) * random()),
     Math.sign(fullRandom()) * (minBound + (maxBound - minBound) * random()),
     Math.sign(fullRandom()) * (minBound + (maxBound - minBound) * random()), type);
   nm.randSpeed();
-  console.log(nm.x, nm.y, nm.z);
   return nm;
 }
 
@@ -218,7 +211,7 @@ class Molecule {
 
   }
 
-  checkBounds(m) {
+  checkBounds() {
     // Check if free molecule has escaped sketch bounds.
     push();
     noFill();
@@ -226,7 +219,7 @@ class Molecule {
     stroke(0);
     box(2 * bound);
     pop();
-    if (m.x > bound || m.y > bound || m.z > bound || m.x < -bound || m.y < -bound || m.z < -bound) return true;
+    if (this.x > bound || this.y > bound || this.z > bound || this.x < -bound || this.y < -bound || this.z < -bound) return true;
     else return false;
   }
 
