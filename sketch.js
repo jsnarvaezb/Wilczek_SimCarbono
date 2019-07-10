@@ -204,6 +204,7 @@ class Molecule {
     this.x += this.xspeed;
     this.y += this.yspeed;
     this.z += this.zspeed;
+
     if (this.checkBounds()) {
       this.drawMolecule();
       return false;
@@ -219,8 +220,8 @@ class Molecule {
     stroke(0);
     box(2 * bound);
     pop();
-    if (this.x > bound || this.y > bound || this.z > bound || this.x < -bound || this.y < -bound || this.z < -bound) return true;
-    else return false;
+    if (this.x > bound || this.y > bound || this.z > bound || this.x < -bound || this.y < -bound || this.z < -bound) return false;
+    else return true;
   }
 
   drawMolecule() {
