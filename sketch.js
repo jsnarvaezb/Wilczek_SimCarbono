@@ -140,8 +140,7 @@ function draw() {
 
   // Iteration over freeMolecules
   for (let m of freeMolecules) {
-    m.updateMolecule();
-    if (checkBounds(m)) bondMolecules.splice(bondMolecules.indexOf(m), 1);
+    if (m.updateMolecule()) bondMolecules.splice(bondMolecules.indexOf(m), 1);
   }
 }
 ////    ////    ////    ////    ////    ////    ////    ////    ////    ////
@@ -155,13 +154,13 @@ function keyTyped() {
   }
 }
 
-function newMolecule(type){
-  var minBound = bound/2;
-  var maxBound = bound-100;
+function newMolecule(type) {
+  var minBound = bound / 2;
+  var maxBound = bound - 100;
   console.log("asdasdasd");
-  nm = new Molecule(Math.sign(fullRandom())*(minBound+(maxBound-minBound)*random()),
-                    Math.sign(fullRandom())*(minBound+(maxBound-minBound)*random()),
-                    Math.sign(fullRandom())*(minBound+(maxBound-minBound)*random()),type);
+  nm = new Molecule(Math.sign(fullRandom()) * (minBound + (maxBound - minBound) * random()),
+    Math.sign(fullRandom()) * (minBound + (maxBound - minBound) * random()),
+    Math.sign(fullRandom()) * (minBound + (maxBound - minBound) * random()), type);
   nm.randSpeed();
   console.log(nm.x, nm.y, nm.z);
   return nm;
@@ -170,18 +169,6 @@ function newMolecule(type){
 function fullRandom() {
   // -1 <= fullRandom() < 1
   return 2 * Math.random() - 1;
-}
-
-function checkBounds(m) {
-  // Check if free molecule has escaped sketch bounds.
-  push();
-  noFill();
-  strokeWeight(5);
-  stroke(0);
-  box(2 * bound);
-  pop();
-  if (m.x > bound || m.y > bound || m.z > bound || m.x < -bound || m.y < -bound || m.z < -bound) return true;
-  else return false;
 }
 
 ////    ////    ////    ////    ////    ////    ////    ////    ////    ////
@@ -200,13 +187,13 @@ class Molecule {
 
     this.zeroSpeed();
 
-    id_counter+=1;
+    id_counter += 1;
   }
 
   randSpeed() {
-    this.xspeed = (-speed)*Math.sign(this.x)*random();
-    this.yspeed = (-speed)*Math.sign(this.y)*random();
-    this.zspeed = (-speed)*Math.sign(this.z)*random();
+    this.xspeed = (-speed) * Math.sign(this.x) * random();
+    this.yspeed = (-speed) * Math.sign(this.y) * random();
+    this.zspeed = (-speed) * Math.sign(this.z) * random();
   }
   zeroSpeed() {
     this.xspeed = 0;
@@ -219,8 +206,23 @@ class Molecule {
     this.x += this.xspeed;
     this.y += this.yspeed;
     this.z += this.zspeed;
+    if (this.checkBounds()) {
+      this.drawMolecule();
+      return false;
+    } else return true;
 
-    this.drawMolecule();
+  }
+
+  checkBounds(m) {
+    // Check if free molecule has escaped sketch bounds.
+    push();
+    noFill();
+    strokeWeight(5);
+    stroke(0);
+    box(2 * bound);
+    pop();
+    if (m.x > bound || m.y > bound || m.z > bound || m.x < -bound || m.y < -bound || m.z < -bound) return true;
+    else return false;
   }
 
   drawMolecule() {
