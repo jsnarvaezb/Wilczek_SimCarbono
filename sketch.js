@@ -92,6 +92,8 @@ var freeMolecules = []; // Free molecules array
 var d = 50; // Bond distance
 var r = 10; // Atom radius
 var bound = 1000; // min/MAX axis value of free molecules
+var speed = 5;
+var id_counter = 0;
 
 var MODE = 0;
 /* Sketch Modes:
@@ -113,12 +115,12 @@ function setup() {
   createCanvas(windowWidth, windowHeight, WEBGL);
   angleMode(DEGREES);
 
-  debugMode();
+  //debugMode();
 
   // Test objects
-  bondMolecules.push(new Molecule(0, 0, 0, 'D'));
-  bondMolecules.push(new Molecule(0, 0, 100, 'G2D'));
-  bondMolecules.push(new Molecule(0, 0, -100, 'G3D'));
+  //bondMolecules.push(new Molecule(0, 0, 0, 'D'));
+  bondMolecules.push(new Molecule(0, 0, 0, 'G2D'));
+  //bondMolecules.push(new Molecule(0, 0, -100, 'G3D'));
 }
 ////    ////    ////    ////    ////    ////    ////    ////    ////    ////
 ////            SETUP END
@@ -133,13 +135,13 @@ function draw() {
 
   // Iteration over bondMolecules
   for (let m of bondMolecules) {
-    m.updateMolecule();
-    if (checkBounds(m)) bondMolecules.splice(bondMolecules.indexOf(m), 1);
+    m.drawMolecule();
   }
 
   // Iteration over freeMolecules
   for (let m of freeMolecules) {
-
+    m.updateMolecule();
+    if (checkBounds(m)) bondMolecules.splice(bondMolecules.indexOf(m), 1);
   }
 }
 ////    ////    ////    ////    ////    ////    ////    ////    ////    ////
@@ -149,11 +151,20 @@ function draw() {
 function keyTyped() {
   // Insert new molecules to the field with key 'm'
   if (key == 'm') {
-    nm = new Molecule(200 * fullRandom(), 200 * fullRandom(), 200 * fullRandom(), 'D');
-    nm.randSpeed();
-
-    bondMolecules.push(nm);
+    bondMolecules.push(newMolecule('D'));
   }
+}
+
+function newMolecule(type){
+  var minBound = bound/2;
+  var maxBound = bound-100;
+  console.log("asdasdasd");
+  nm = new Molecule(Math.sign(fullRandom())*(minBound+(maxBound-minBound)*random()),
+                    Math.sign(fullRandom())*(minBound+(maxBound-minBound)*random()),
+                    Math.sign(fullRandom())*(minBound+(maxBound-minBound)*random()),type);
+  nm.randSpeed();
+  console.log(nm.x, nm.y, nm.z);
+  return nm;
 }
 
 function fullRandom() {
@@ -182,18 +193,20 @@ class Molecule {
     this.y = y;
     this.z = z;
     this.type = type;
-    this.id = frameCount;
-
+    this.id = id_counter;
+    this.isFull = false;
     this.bonds2D = [null, null, null, null, null, null]; // Clockwise: 1, 3, 5, 7, 9, 11.
     this.bonds3D = [null, null, null, null, null, null]; // Clockwise: U2, U6, U10, D12, D4, D8.
 
     this.zeroSpeed();
+
+    id_counter+=1;
   }
 
   randSpeed() {
-    this.xspeed = fullRandom();
-    this.yspeed = fullRandom();
-    this.zspeed = fullRandom();
+    this.xspeed = (-speed)*Math.sign(this.x)*random();
+    this.yspeed = (-speed)*Math.sign(this.y)*random();
+    this.zspeed = (-speed)*Math.sign(this.z)*random();
   }
   zeroSpeed() {
     this.xspeed = 0;
