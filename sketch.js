@@ -141,7 +141,7 @@ function draw() {
   // Iteration over freeMolecules
   for (let m of freeMolecules) {
     m.updateMolecule();
-    if (checkBounds(m)) bondMolecules.splice(bondMolecules.indexOf(m), 1);
+    if (checkBounds(m)) freeMolecules.splice(freeMolecules.indexOf(m), 1);
   }
 }
 ////    ////    ////    ////    ////    ////    ////    ////    ////    ////
@@ -151,7 +151,7 @@ function draw() {
 function keyTyped() {
   // Insert new molecules to the field with key 'm'
   if (key == 'm') {
-    bondMolecules.push(newMolecule('D'));
+    freeMolecules.push(newMolecule('D'));
   }
 }
 
