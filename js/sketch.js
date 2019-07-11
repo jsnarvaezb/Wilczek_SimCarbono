@@ -91,25 +91,53 @@ var freeMolecules = []; // Free molecules array
 
 var d = 50; // Bond distance
 var r = 10; // Atom radius
-var bound = 1000; // min/MAX axis value of free molecules
+var bound = 1000; // -min/+MAX axis value of free molecules
 var speed = 5;
 var id_counter = 0;
 
-var MODE = 0;
-/* Sketch Modes:
-0: Help Menu
-1: Graphene
-2: Diamond
-3: Graphene 2D
-4: Graphene 3D (2+1)
-5: Diamond 3D
-6: Buckyball C_20
-7: Buckyball C_60
-*/
-var slct; // Menu select
+// Sketck modes
+var modes = [
+  '-- Seleccionar modo --',
+  'Grafeno Unitario',
+  'Diamante Unitario',
+  'Grafeno 2D',
+  'Nanotubo 5x0',
+  'Nanotubo 5x5',
+  'Buckyball C_20',
+  'Buckyball C_60',
+  'Nanocono'
+];
+var curMode = '';
 
+var menu = {}; // Menu object
+var objFiles = [
+  'gr.obj',
+  'nt_5x0.obj',
+  'nt_5x5.obj',
+  'c20.obj',
+  'c60.obj',
+  'nc.obj'
+];
+var gr;
+var nt50;
+var nt55;
+var c20;
+var c60;
+var nc;
+var curModel = 0;
 ////    ////    ////    ////    ////    ////    ////    ////    ////    ////
-////            SETUP START
+////            PRELOAD
+////    ////    ////    ////    ////    ////    ////    ////    ////    ////
+function preload() {
+  //gr = loadModel('obj/gr.obj');
+  //nt50 = loadModel('obj/nt_5x0.obj');
+  //nt55 = loadModel('obj/nt_5x0.obj');
+  c20 = loadModel('obj/c20.obj', true);
+  c60 = loadModel('obj/c60.obj', true);
+  //nc = loadModel('obj/nc.obj');
+}
+////    ////    ////    ////    ////    ////    ////    ////    ////    ////
+////            SETUP
 ////    ////    ////    ////    ////    ////    ////    ////    ////    ////
 function setup() {
   // Environment setup
@@ -122,24 +150,58 @@ function setup() {
   // Test objects
 
   //bondMolecules.push(new Molecule(0, 0, 0, 'D'));
-  bondMolecules.push(new Molecule(0, 0, 0, 'G2D'));
+  //bondMolecules.push(new Molecule(0, 0, 0, 'G2D'));
   //bondMolecules.push(new Molecule(0, 0, -100, 'G3D'));
 }
 ////    ////    ////    ////    ////    ////    ////    ////    ////    ////
-////            SETUP END
-////    ////    ////    ////    ////    ////    ////    ////    ////    ////
-
-////    ////    ////    ////    ////    ////    ////    ////    ////    ////
-////            DRAW START
+////            DRAW
 ////    ////    ////    ////    ////    ////    ////    ////    ////    ////
 function draw() {
   background(250);
   orbitControl();
 
+  if(curModel)model(curModel);
+  /*
+    switch (modes.indexOf(curMode)) {
+      case 0:
+
+        break;
+      case 1:
+
+        break;
+      case 2:
+
+        break;
+      case 3:
+
+        break;
+      case 4:
+
+        break;
+      case 5:
+
+        break;
+      case 6:
+
+        break;
+      case 7:
+
+        break;
+      case 8:
+
+        break;
+      case 9:
+
+        break;
+      default:
+        console.log('default case');
+    }
+  */
   // TEST
   //console.log(freeMolecules.length);
   //if (freeMolecules.length < 200) freeMolecules.push(newMolecule('G2D'));
 
+  /*
   // Iteration over bondMolecules
   for (let m of bondMolecules) {
     m.drawMolecule();
@@ -150,6 +212,7 @@ function draw() {
   for (let m of freeMolecules) {
     if (m.updateMolecule()) freeMolecules.splice(freeMolecules.indexOf(m), 1);
   }
+  */
 }
 ////    ////    ////    ////    ////    ////    ////    ////    ////    ////
 ////            DRAW END
@@ -163,26 +226,31 @@ function keyTyped() {
 }
 
 function newMolecule(type) {
-  var minBound = bound / 2;
-  var maxBound = bound - 100;
-  nm = new Molecule(Math.sign(fullRandom()) * (minBound + (maxBound - minBound) * random()),
+  let minBound = bound / 2;
+  let maxBound = bound - 100;
+  let nm = new Molecule(Math.sign(fullRandom()) * (minBound + (maxBound - minBound) * random()),
     Math.sign(fullRandom()) * (minBound + (maxBound - minBound) * random()),
     Math.sign(fullRandom()) * (minBound + (maxBound - minBound) * random()), type);
   nm.randSpeed();
   return nm;
 }
 
-function createMenu(){
-  slct = createSelect();
-  slct.position(10, 10);
-  slct.option('pear');
-  slct.option('Grafeno');
-  slct.option('Diamante');
-  slct.changed(changedSelect);
+function createMenu() {
+  menu.slct = createSelect();
+  menu.slct.position(10, 10);
+  for (let md of modes) {
+    menu.slct.option(md);
+  }
+  menu.slct.changed(changedSelect);
 }
-function changedSelect(){
-  console.log("Select changed to:", slct.value());
 
+function changedSelect() {
+  curMode = menu.slct.value();
+  console.log('Select changed to: ' + curMode);
+
+  if (modes.indexOf(curMode) >= 3) {
+    curModel = loadModel('obj/' + objFiles[modes.indexOf(curMode) - 3], true);
+  }
 }
 
 function fullRandom() {
