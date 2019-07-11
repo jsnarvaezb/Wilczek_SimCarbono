@@ -39,16 +39,16 @@ class Molecule {
 
   checkNear() {
     for (let m of freeMolecules) {
-      if (dist(this.x, this.y, this.z, m.x, m.y, m.z) <= 20*d) {
+      if (dist(this.x, this.y, this.z, m.x, m.y, m.z) <= 20 * d) {
         var newx = this.x - m.x;
         var newy = this.y - m.y;
-        var h = sqrt(sq(newx)+sq(newy));
-        var angle = acos(newx/h);
-        if(0 <= angle && angle < 60 && this.bonds2D[0]==null){
+        var h = sqrt(sq(newx) + sq(newy));
+        var angle = acos(newx / h);
+        if (0 <= angle && angle < 60 && this.bonds2D[0] == null) {
           this.bonds2D[0] = m.id;
           m.bonds2D[3] = this.id;
-          m.y = this.y + d*sin(30);
-          m.x = this.x + d + d*cos(30);
+          m.y = this.y + d * sin(30);
+          m.x = this.x + d + d * cos(30);
           m.z = this.z;
           m.zeroSpeed();
           bondMolecules.push(m);

@@ -106,6 +106,7 @@ var MODE = 0;
 6: Buckyball C_20
 7: Buckyball C_60
 */
+var slct; // Menu select
 
 ////    ////    ////    ////    ////    ////    ////    ////    ////    ////
 ////            SETUP START
@@ -114,10 +115,12 @@ function setup() {
   // Environment setup
   createCanvas(windowWidth, windowHeight, WEBGL);
   angleMode(DEGREES);
+  createMenu();
 
   debugMode();
 
   // Test objects
+
   //bondMolecules.push(new Molecule(0, 0, 0, 'D'));
   bondMolecules.push(new Molecule(0, 0, 0, 'G2D'));
   //bondMolecules.push(new Molecule(0, 0, -100, 'G3D'));
@@ -132,8 +135,10 @@ function setup() {
 function draw() {
   background(250);
   orbitControl();
-  console.log(freeMolecules.length);
-  if(freeMolecules.length < 200) freeMolecules.push(newMolecule('G2D'));
+
+  // TEST
+  //console.log(freeMolecules.length);
+  //if (freeMolecules.length < 200) freeMolecules.push(newMolecule('G2D'));
 
   // Iteration over bondMolecules
   for (let m of bondMolecules) {
@@ -167,16 +172,21 @@ function newMolecule(type) {
   return nm;
 }
 
+function createMenu(){
+  slct = createSelect();
+  slct.position(10, 10);
+  slct.option('pear');
+  slct.option('Grafeno');
+  slct.option('Diamante');
+  slct.changed(changedSelect);
+}
+function changedSelect(){
+  console.log("Select changed to:", slct.value());
+
+}
+
 function fullRandom() {
   // -1 <= fullRandom() < 1
   return 2 * Math.random() - 1;
 }
-
-////    ////    ////    ////    ////    ////    ////    ////    ////    ////
-////            MOLECULE CLASS START
-////    ////    ////    ////    ////    ////    ////    ////    ////    ////
-
-////    ////    ////    ////    ////    ////    ////    ////    ////    ////
-////            MOLECULE CLASS END
-////    ////    ////    ////    ////    ////    ////    ////    ////    ////
 // FILE END //
