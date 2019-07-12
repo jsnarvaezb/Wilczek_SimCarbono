@@ -3,9 +3,11 @@ class Molecule {
     this.x = x;
     this.y = y;
     this.z = z;
+
     this.type = type;
     this.id = id_counter;
     this.isFull = false;
+    
     this.bonds2D = [null, null, null, null, null, null]; // Clockwise: 1, 3, 5, 7, 9, 11.
     this.bonds3D = [null, null, null, null, null, null]; // Clockwise: U2, U6, U10, D12, D4, D8.
 

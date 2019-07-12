@@ -160,7 +160,7 @@ function draw() {
   background(250);
   orbitControl();
 
-  if(curModel)model(curModel);
+  if (curModel) model(curModel);
   /*
     switch (modes.indexOf(curMode)) {
       case 0:
