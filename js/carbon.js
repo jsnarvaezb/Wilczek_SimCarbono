@@ -8,23 +8,31 @@ Kind is one of:
 3 : graphene 2D+1 down
 4 : diamond up
 5 : diamond down
+
+status is one of:
+free: free carbon
+bond: bonded carbon
+full: full carbon
 */
 class Carbon {
-  constructor(x, y, z, kind) {
+  constructor(x, y, z, kind, status) {
     this.x = x;
     this.y = y;
     this.z = z;
 
     this.kind = kind;
+    id_counter += 1;
     this.id = id_counter;
     this.isFull = false;
+    this.status = status;
 
-    bonds = [0, 0, 0, 0];
-    drawn = [0, 0, 0, 0];
-    if (this.kind == 'G2D') bonds[0] = 'NO';
+    this.bonds = [0, 0, 0, 0];
+    this.drawn = [0, 0, 0, 0];
+    if (this.kind == 'G2D' || this.kind == 'G2DU' || this.kind == 'G2DD') this.bonds[0] = 'NO';
     this.zeroSpeed();
-    id_counter += 1;
+
   }
+
 
 
   randSpeed() {
@@ -38,24 +46,95 @@ class Carbon {
     this.zspeed = 0;
   }
 
+  updateCarbon() {
+    // update values
+    this.x += this.xspeed;
+    this.y += this.yspeed;
+    this.z += this.zspeed;
+
+    if (this.checkBounds()) {
+      this.drawCarbon();
+      return false;
+    } else return true;
+  }
+  bondLocation(x, y, z, iBond) {
+    if (this.kind == 'G2DU' || this.kind == 'G3DU') {
+      if (iBond == 1) {
+        this.x = x;
+        this.y = y + d;
+      } else if (iBond == 2) {
+        this.x = x - d * cos(30);
+        this.y = y - d * sin(30);
+      } else if (iBond == 3) {
+        this.x = x + d * cos(30);
+        this.y = y - d * sin(30);
+      }
+      if (this.kind == 'G3DU') {
+        if (iBond == 0) this.z = z + d;
+      }
+    } else if (this.kind == 'G2DD' || this.kind == 'G3DD') {
+      if (iBond == 1) {
+        this.x = x;
+        this.y = y - d;
+      } else if (iBond == 2) {
+        this.x = x + d * cos(30);
+        this.y = y + d * sin(30);
+      } else if (iBond == 3) {
+        this.x = x - d * cos(30);
+        this.y = y + d * sin(30);
+      }
+      if (this.kind == 'G3DD') {
+        if (iBond == 0) this.z = z - d;
+      }
+    } else if (this.kind == 'D3DU') {
+
+    } else if (this.kind == 'D3DD') {
+
+    } else console.log('incorrect kind: ' + this.kind);
+  }
+
   checkBounds() {
     // Check if free molecule has escaped sketch bounds.
-    push();
-    noFill();
-    strokeWeight(5);
-    stroke(0);
-    box(2 * bound);
-    pop();
     if (this.x > bound || this.y > bound || this.z > bound || this.x < -bound || this.y < -bound || this.z < -bound) return false;
     else return true;
   }
 
   drawCarbon() {
+    // draw atoms
+    push();
+    translate(this.x, this.y, this.z);
+    sphere(r);
 
+    // draw bonds
+    push();
+    strokeWeight(r / 2);
+    stroke(200); // B Color
+    for (let i = (this.kind == 'G2DU' || this.kind == 'G2DD') ? 0 : 1; i < this.bonds.length; i += 1) {
+      if (this.bonds[i] == 'NO' || this.bonds[i] == 0) continue
+      if (this.kind == 'G2DU' || this.kind == 'G3DU') {
+        if (i == 0) line(0, 0, 0, 0, 0, d);
+        else if (i == 1) line(0, 0, 0, 0, -d, 0);
+        else if (i == 2) line(0, 0, 0, d * cos(30), d * sin(30), 0);
+        else if (i == 3) line(0, 0, 0, -d * cos(30), d * sin(30), 0);
+      }
+      if (this.kind == 'G3DD' || this.kind == 'G3DD') {
+        if (i == 0) line(0, 0, 0, 0, 0, -d);
+        else if (i == 1) line(0, 0, 0, 0, d, 0);
+        else if (i == 2) line(0, 0, 0, -d * cos(30), -d * sin(30), 0);
+        else if (i == 3) line(0, 0, 0, d * cos(30), -d * sin(30), 0);
+      }
+      if (this.kind == 'D3DU') {
 
+      }
+      if (this.kind == 'D3DD') {
+
+      }
+    }
+    pop();
+    pop();
   }
 }
-
+// CARBON CLASS END
 
 // Draw Unit Molecule helper function (at origin)
 function drawUnit(isGraphene) {
@@ -89,7 +168,7 @@ function drawUnit(isGraphene) {
   }
 
   push();
-  translate(0, -d * cos(30),0);
+  translate(0, -d * cos(30), 0);
   sphere(r); // C 12:00
   pop();
 

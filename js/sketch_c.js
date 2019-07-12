@@ -11,11 +11,11 @@ Por medio de moléculas de Grafeno y Diamante, podemos construir  Grafeno bidime
 */
 
 // Global var
-var bondMolecules = []; // Bonded molecules array
-var freeMolecules = []; // Free molecules array
+var molecules = []; // Molecules array
 
 var d = 50; // Bond distance
 var r = 10; // Atom radius
+var b = 100;
 var speed = 5;
 var id_counter = 0;
 
@@ -28,11 +28,11 @@ var modes = [
   'Grafeno Unitario', // 1
   'Diamante Unitario', // 2
   'Grafeno 2D', // 3
-  'Diamante 3D', // 4
+  'Grafeno 2D+1', // 4
   'Buckyball C_20', // 5
   'Buckyball C_60', // 6
 ];
-var curMode = 2;
+var curMode = 3;
 
 var menu = {}; // Menu object
 
@@ -56,7 +56,7 @@ function setup() {
   angleMode(DEGREES);
   createMenu();
 
-  //debugMode();
+  debugMode();
 
   push();
   noStroke();
@@ -73,6 +73,13 @@ function draw() {
     rotateX(frameCount * 0.2);
     rotateY(frameCount * 0.2);
   }
+  push();
+  noFill();
+  strokeWeight(5);
+  stroke(0);
+  box(2 * bound);
+  pop();
+
   switch (curMode) {
     case 1:
     case 2:
@@ -83,18 +90,74 @@ function draw() {
     case 3:
     case 4:
       // Run simulation
-      /*
-      // Iteration over bondMolecules
-      for (let m of bondMolecules) {
-        m.drawMolecule();
-        m.checkNear();
-      }
 
-      // Iteration over freeMolecules
-      for (let m of freeMolecules) {
-        if (m.updateMolecule()) freeMolecules.splice(freeMolecules.indexOf(m), 1);
+      // Iteration over molecules
+      for (let m of molecules) {
+        switch (m.status) {
+          case 'free': // case free: update (draw)
+            if (m.updateCarbon()) molecules.splice(molecules.indexOf(m), 1);
+            break;
+          case 'bond': // case bond: iterate over molecules
+            for (let n of molecules) {
+              if (n.status == 'free') { // find free molecules
+                if (dist(m.x, m.y, m.z, n.x, n.y, n.z) <= 2 * d) { // check distance
+                  ibond = m.bonds.indexOf(0);
+                  if (ibond == 0) console.log(ibond);
+
+                  if (m.kind == 'G2DU') n.kind = 'G2DD';
+                  else if (m.kind == 'G2DD') n.kind = 'G2DU';
+                  else if (m.kind == 'G3DU') {
+                    if (ibond != 0) n.kind = 'G3DD';
+                    else n.kind = 'G3DU';
+                  } else if (m.kind == 'G3DD') {
+                    if (ibond != 0) n.kind = 'G3DU';
+                    else n.kind = 'G3DD';
+                  }
+
+                  m.bonds[ibond] = n.id;
+                  n.bonds[ibond] = m.id;
+                  n.bondLocation(m.x, m.y, m.z, ibond);
+                  n.zeroSpeed();
+                  n.status = 'bond';
+
+
+                }
+              } else if (n.status == 'bond') {
+                if (m.id != n.id && (dist(m.x, m.y, m.z, n.x, n.y, n.z) <= 1.01 * d)) {
+                  if (m.z != n.z) {
+                    m.bonds[0] = n.id;
+                    n.bonds[0] = m.id;
+                  } else if (dist(m.x, 0, n.x, 0) <= 0.1 * d) {
+                    m.bonds[1] = n.id;
+                    n.bonds[1] = m.id;
+                  } else if (m.x - n.x < 0) {
+                    m.bonds[m.kind[3] == 'U' ? 2 : 3] = n.id;
+                    n.bonds[m.kind[3] == 'U' ? 2 : 3] = m.id;
+                  } else if (m.x - n.x > 0) {
+                    m.bonds[m.kind[3] == 'U' ? 3 : 2] = n.id;
+                    n.bonds[m.kind[3] == 'U' ? 3 : 2] = m.id;
+                  }
+                }
+              }
+              if (n.bonds.indexOf(0) == -1) n.status = 'full';
+              if (m.bonds.indexOf(0) == -1) {
+                m.status = 'full';
+                break;
+              }
+            }
+            m.drawCarbon();
+            break;
+
+          case 'full': // case full: just draw
+            m.drawCarbon();
+            break;
+
+          default:
+            console.log('carbon ' + m + 'with wrong status');
+            break;
+        }
+
       }
-      */
       break;
 
     case 5:
@@ -108,7 +171,7 @@ function draw() {
     default:
       // No case is default case
       break;
-  }
+  } // CURMODE SWITCH END
 }
 ////    ////    ////    ////    ////    ////    ////    ////    ////    ////
 ////            DRAW END
@@ -116,8 +179,11 @@ function draw() {
 
 function keyTyped() {
   // Insert new molecules to the field with key 'm'
-  if (key == 'm') {
-    freeMolecules.push(newCarbon('G2D'));
+  if (curMode == 3 || curMode == 4) {
+    if (key == 'm') {
+      molecules.push(newCarbon(curMode == 3 ? 'G2D' : 'G3D'));
+      console.log(molecules);
+    }
   }
 }
 
@@ -127,9 +193,10 @@ function newCarbon(kind) {
 
   let nx = Math.sign(fullRandom()) * (minBound + (maxBound - minBound) * random());
   let ny = Math.sign(fullRandom()) * (minBound + (maxBound - minBound) * random());
-  let nz = kind != 'G2D' ? 0 : Math.sign(fullRandom()) * (minBound + (maxBound - minBound) * random());
+  let nz = kind == 'G2D' ? 0 : Math.sign(fullRandom()) * (minBound + (maxBound - minBound) * random());
 
-  let nm = new Carbon(nx, ny, nz, kind);
+  let nm = new Carbon(nx, ny, nz, kind, 'free');
+  nm.randSpeed();
   return nm;
 }
 
@@ -140,13 +207,19 @@ function createMenu() {
   for (let md of modes) {
     menu.slct.option(md);
   }
+
   menu.slct.changed(function() {
     curMode = modes.indexOf(menu.slct.value());
     console.log('Select changed to: ' + curMode + ', ' + modes[curMode]);
-    freeMolecules = [];
-    bondMolecules = [];
-    //bondMolecules.push();
+    molecules = [];
+
+    if (curMode == 3) {
+      molecules.push(new Carbon(0, 0, 0, 'G2DU', 'bond'));
+    } else if (curMode == 4) {
+      molecules.push(new Carbon(0, 0, 0, 'G3DU', 'bond'));
+    }
   });
+
   // ROTATE CHECK
   menu.chkRotate = createCheckbox('Habilitar Rotación', false);
   menu.chkRotate.position(10, 35);
@@ -157,9 +230,7 @@ function createMenu() {
     if (menu.chkMat.checked()) {
       push();
       normalMaterial();
-    } else {
-      pop();
-    }
+    } else pop();
   });
 }
 
