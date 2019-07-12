@@ -32,7 +32,7 @@ var modes = [
   'Buckyball C_20', // 5
   'Buckyball C_60', // 6
 ];
-var curMode = 3;
+var curMode = 0;
 
 var menu = {}; // Menu object
 
@@ -56,7 +56,7 @@ function setup() {
   angleMode(DEGREES);
   createMenu();
 
-  debugMode();
+  //debugMode();
 
   push();
   noStroke();
@@ -69,16 +69,17 @@ function draw() {
   background(250);
   orbitControl();
 
-  if (menu.chkRotate.checked()) {
-    rotateX(frameCount * 0.2);
-    rotateY(frameCount * 0.2);
-  }
   push();
   noFill();
   strokeWeight(5);
   stroke(0);
   box(2 * bound);
   pop();
+
+  if (menu.chkRotate.checked()) {
+    rotateX(frameCount * 0.2);
+    rotateY(frameCount * 0.2);
+  }
 
   switch (curMode) {
     case 1:
@@ -102,17 +103,11 @@ function draw() {
               if (n.status == 'free') { // find free molecules
                 if (dist(m.x, m.y, m.z, n.x, n.y, n.z) <= 2 * d) { // check distance
                   ibond = m.bonds.indexOf(0);
-                  if (ibond == 0) console.log(ibond);
 
                   if (m.kind == 'G2DU') n.kind = 'G2DD';
                   else if (m.kind == 'G2DD') n.kind = 'G2DU';
-                  else if (m.kind == 'G3DU') {
-                    if (ibond != 0) n.kind = 'G3DD';
-                    else n.kind = 'G3DU';
-                  } else if (m.kind == 'G3DD') {
-                    if (ibond != 0) n.kind = 'G3DU';
-                    else n.kind = 'G3DD';
-                  }
+                  else if (m.kind == 'G3DU') n.kind = 'G3DD';
+                  else if (m.kind == 'G3DD') n.kind = 'G3DU';
 
                   m.bonds[ibond] = n.id;
                   n.bonds[ibond] = m.id;
@@ -122,7 +117,23 @@ function draw() {
 
 
                 }
-              } else if (n.status == 'bond') {
+              } else if (n.status == 'bond' && curMode == 3) {
+                if (m.id != n.id && (dist(m.x, m.y, m.z, n.x, n.y, n.z) <= 1.01 * d)) {
+                  if ((m.z > n.z && m.kind == 'G3DD' && n.kind == 'G3DU')||(m.z < n.z && m.kind == 'G3DU' && n.kind == 'G3DD')) {
+                    m.bonds[0] = n.id;
+                    n.bonds[0] = m.id;
+                  } else if (dist(m.x, 0, n.x, 0) <= 0.1 * d) {
+                    m.bonds[1] = n.id;
+                    n.bonds[1] = m.id;
+                  } else if (m.x - n.x < 0) {
+                    m.bonds[m.kind[3] == 'U' ? 2 : 3] = n.id;
+                    n.bonds[m.kind[3] == 'U' ? 2 : 3] = m.id;
+                  } else if (m.x - n.x > 0) {
+                    m.bonds[m.kind[3] == 'U' ? 3 : 2] = n.id;
+                    n.bonds[m.kind[3] == 'U' ? 3 : 2] = m.id;
+                  }
+                }
+              } else if (n.status == 'bond' && curMode == 4) {
                 if (m.id != n.id && (dist(m.x, m.y, m.z, n.x, n.y, n.z) <= 1.01 * d)) {
                   if (m.z != n.z) {
                     m.bonds[0] = n.id;
@@ -182,7 +193,6 @@ function keyTyped() {
   if (curMode == 3 || curMode == 4) {
     if (key == 'm') {
       molecules.push(newCarbon(curMode == 3 ? 'G2D' : 'G3D'));
-      console.log(molecules);
     }
   }
 }
@@ -212,6 +222,7 @@ function createMenu() {
     curMode = modes.indexOf(menu.slct.value());
     console.log('Select changed to: ' + curMode + ', ' + modes[curMode]);
     molecules = [];
+    id_counter = 0;
 
     if (curMode == 3) {
       molecules.push(new Carbon(0, 0, 0, 'G2DU', 'bond'));

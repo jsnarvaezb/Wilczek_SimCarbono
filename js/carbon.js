@@ -62,29 +62,37 @@ class Carbon {
       if (iBond == 1) {
         this.x = x;
         this.y = y + d;
+        this.z = z;
       } else if (iBond == 2) {
         this.x = x - d * cos(30);
         this.y = y - d * sin(30);
+        this.z = z;
       } else if (iBond == 3) {
         this.x = x + d * cos(30);
         this.y = y - d * sin(30);
-      }
-      if (this.kind == 'G3DU') {
-        if (iBond == 0) this.z = z + d;
+        this.z = z;
+      } else if (iBond == 0) {
+        this.x = x;
+        this.y = y;
+        this.z = z - d;
       }
     } else if (this.kind == 'G2DD' || this.kind == 'G3DD') {
       if (iBond == 1) {
         this.x = x;
         this.y = y - d;
+        this.z = z;
       } else if (iBond == 2) {
         this.x = x + d * cos(30);
         this.y = y + d * sin(30);
+        this.z = z;
       } else if (iBond == 3) {
         this.x = x - d * cos(30);
         this.y = y + d * sin(30);
-      }
-      if (this.kind == 'G3DD') {
-        if (iBond == 0) this.z = z - d;
+        this.z = z;
+      } else if (iBond == 0) {
+        this.x = x;
+        this.y = y;
+        this.z = z + d;
       }
     } else if (this.kind == 'D3DU') {
 
@@ -109,15 +117,16 @@ class Carbon {
     push();
     strokeWeight(r / 2);
     stroke(200); // B Color
-    for (let i = (this.kind == 'G2DU' || this.kind == 'G2DD') ? 0 : 1; i < this.bonds.length; i += 1) {
-      if (this.bonds[i] == 'NO' || this.bonds[i] == 0) continue
+    for (let i = (this.kind == 'G2DU' || this.kind == 'G2DD') ? 1 : 0; i < this.bonds.length; i += 1) {
+      //if (this.bonds[i] == 'NO' ||
+      if (this.bonds[i] == 0) continue;
       if (this.kind == 'G2DU' || this.kind == 'G3DU') {
         if (i == 0) line(0, 0, 0, 0, 0, d);
         else if (i == 1) line(0, 0, 0, 0, -d, 0);
         else if (i == 2) line(0, 0, 0, d * cos(30), d * sin(30), 0);
         else if (i == 3) line(0, 0, 0, -d * cos(30), d * sin(30), 0);
       }
-      if (this.kind == 'G3DD' || this.kind == 'G3DD') {
+      if (this.kind == 'G2DD' || this.kind == 'G3DD') {
         if (i == 0) line(0, 0, 0, 0, 0, -d);
         else if (i == 1) line(0, 0, 0, 0, d, 0);
         else if (i == 2) line(0, 0, 0, -d * cos(30), -d * sin(30), 0);
